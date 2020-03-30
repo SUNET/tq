@@ -37,7 +37,7 @@ deps:
 
 .PHONY: tq
 tq:
-	go build -ldflags "$(LDFLAGS)" ./cmd/tq.go
+	go build -ldflags "$(LDFLAGS)" ./cmd/tq
 
 .PHONY: go-install
 go-install:
