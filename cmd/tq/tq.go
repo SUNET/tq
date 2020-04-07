@@ -1,58 +1,65 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
-	"flag"
-	"github.com/SUNET/tq"
+
+	"github.com/SUNET/tq/pkg/pipeline"
+	"github.com/sirupsen/logrus"
+	"github.com/spy16/sabre"
+	"github.com/spy16/sabre/repl"
 )
 
-type Parameters struct {
-	url string
+var Log = logrus.New()
+
+var helpFlag bool
+var branch string
+var commit string
+var version string
+
+func usage(code int) {
+	fmt.Println("usage: tq [-h] [-e <expression>]")
+	os.Exit(code)
 }
 
-var p = &Parameters{}
-
-var pubCommand = flag.NewFlagSet("pub", flag.ExitOnError)
-var subCommand = flag.NewFlagSet("sub", flag.ExitOnError)
-
-func commonFlags(fs *flag.FlagSet) {
-	fs.StringVar(&p.url,"url","tcp://127.0.0.1:9999","endpoint URL")
+func ver() string {
+	if len(branch) > 0 && len(commit) > 0 {
+		return fmt.Sprintf("%s@%s", commit, branch)
+	} else if len(version) > 0 {
+		return fmt.Sprintf("v%s", version)
+	} else {
+		return "unknown"
+	}
 }
-
-func usage() {
-	fmt.Println("usage: tq <command> [<args>]")
-        fmt.Println("common arguments:")
-        fmt.Println("\t--url=<url>\tspecify the URL to listen/connect to")
-        fmt.Println("commands:")
-        fmt.Println("\ttq pub [<common arguments>]")
-        fmt.Println("\ttq sub [<common arguments>] -- <cmdline>")
-        os.Exit(2)
-}
-
 
 func main() {
-	tq.Log.Out = os.Stdout
-	commonFlags(pubCommand)
-	commonFlags(subCommand)
-
-	if len(os.Args) == 1 {
-		usage()
+	Log.Out = os.Stdout
+	flag.Parse()
+	if helpFlag {
+		usage(0)
 	}
-
-	switch os.Args[1] {
-	case "pub":
-		pubCommand.Parse(os.Args[2:])
-		tq.Sub(p.url, flag.Args())
-	case "sub":
-		subCommand.Parse(os.Args[2:])
-		tq.Pub(p.url)
-	case "help",
-	     "--help",
-	     "?":
-		usage()
-	default:
-		fmt.Println("%q is not a valid command", os.Args[1])
-		os.Exit(2)
+	scope := sabre.NewScope(nil)
+	for k, v := range pipeline.PipelineFactories {
+		_ = scope.BindGo(k, v)
 	}
+	stat, _ := os.Stdin.Stat()
+	defer func() {
+		if r := recover(); r != nil {
+			Log.Debug("recovered...")
+		}
+	}()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		fmt.Println("data is being piped to stdin")
+	} else {
+		repl.New(scope,
+			repl.WithBanner(fmt.Sprintf("tq shell [%s]", ver())),
+			repl.WithPrompts(">", "|"),
+		).Loop(context.Background())
+	}
+}
+
+func init() {
+	flag.BoolVar(&helpFlag, "h", false, "show help")
 }

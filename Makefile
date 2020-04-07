@@ -28,12 +28,7 @@ endif
 
 .PHONY: all
 all:
-	@$(MAKE) --no-print-directory deps
 	@$(MAKE) --no-print-directory tq
-
-.PHONY: deps
-deps:
-	dep ensure -vendor-only
 
 .PHONY: tq
 tq:
