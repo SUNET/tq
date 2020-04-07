@@ -1,4 +1,4 @@
 tq
 --
 
-TinyQ is a lisp-powered message server based on nanomsg (aka zeroq).
+TinyQ is a lisp-powered message server based on nanomsg (aka zeroq) written in golang.
