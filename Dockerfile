@@ -2,7 +2,6 @@ FROM golang:latest as build
 RUN mkdir -p /go/src/github.com/SUNET/tq
 ADD . /go/src/github.com/SUNET/tq/
 WORKDIR /go/src/github.com/SUNET/tq
-#RUN go build ./cmd/tq
 RUN make
 RUN env GOBIN=/usr/bin go install ./cmd/tq
 

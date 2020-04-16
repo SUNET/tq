@@ -7,7 +7,7 @@ import (
 	_ "go.nanomsg.org/mangos/v3/transport/all"
 )
 
-var newPubSink = func(url string) Pipeline {
+func MakePublishPipeline(url string) Pipeline {
 	var err error
 	var sock mangos.Socket
 	var data []byte
@@ -18,17 +18,15 @@ var newPubSink = func(url string) Pipeline {
 		Log.Panicf("can't listen to pub %s on socket: %s", url, err.Error())
 	}
 
-	return NewPipelineFromHandler(func(o message.Message) message.Message {
-		data, err = message.FromJson(o)
-		if err != nil {
-			Log.Errorf("Error serializing json: %s", err)
-		} else {
-			sock.Send(data)
-		}
-		return o
-	})
-}
-
-func init() {
-	Register("pub", newPubSink)
+	return func(cs ...*message.MessageChannel) *message.MessageChannel {
+		return message.ProcessChannels(func(o message.Message) message.Message {
+			data, err = message.FromJson(o)
+			if err != nil {
+				Log.Errorf("Error serializing json: %s", err)
+			} else {
+				sock.Send(data)
+			}
+			return o
+		}, cs...)
+	}
 }

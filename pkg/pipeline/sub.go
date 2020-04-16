@@ -1,13 +1,15 @@
 package pipeline
 
 import (
+	"fmt"
+
 	"github.com/SUNET/tq/pkg/message"
 	"go.nanomsg.org/mangos/v3"
 	"go.nanomsg.org/mangos/v3/protocol/sub"
 	_ "go.nanomsg.org/mangos/v3/transport/all"
 )
 
-var newSubSource = func(url string) Pipeline {
+func MakeSubscribePipeline(url string) Pipeline {
 	var err error
 	var sock mangos.Socket
 	if sock, err = sub.NewSocket(); err != nil {
@@ -21,8 +23,8 @@ var newSubSource = func(url string) Pipeline {
 		Log.Panicf("cannot subscribe: %s", err.Error())
 	}
 
-	return func(<-chan message.Message) <-chan message.Message {
-		out := make(chan message.Message)
+	return func(...*message.MessageChannel) *message.MessageChannel {
+		out := message.NewMessageChannel(fmt.Sprintf("sub [%s]", url))
 		go func() {
 			var err error
 			var data []byte
@@ -34,14 +36,9 @@ var newSubSource = func(url string) Pipeline {
 				if o, err = message.ToJson(data); err != nil {
 					Log.Errorf("Cannot parse json: %s", err.Error())
 				}
-				out <- o
+				out.Send(o)
 			}
-			close(out)
 		}()
 		return out
 	}
-}
-
-func init() {
-	Register("sub", newSubSource)
 }

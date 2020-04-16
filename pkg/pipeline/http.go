@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -9,14 +10,14 @@ import (
 	"github.com/SUNET/tq/pkg/message"
 )
 
-var newRESTSource = func(u string) Pipeline {
+func MakeRESTPipeline(u string) Pipeline {
 	url_parsed, err := url.Parse(u)
 	if err != nil {
 		Log.Panicf("Unable to parse url: %s", err.Error())
 	}
 
-	return func(<-chan message.Message) <-chan message.Message {
-		out := make(chan message.Message)
+	return func(...*message.MessageChannel) *message.MessageChannel {
+		out := message.NewMessageChannel(fmt.Sprintf("http [%s]", u))
 		go func() {
 			pubHandler := func(w http.ResponseWriter, req *http.Request) {
 				var err error
@@ -29,7 +30,7 @@ var newRESTSource = func(u string) Pipeline {
 				if o, err = message.ToJson(data); err != nil {
 					Log.Errorf("Cannot parse json: %s", err.Error())
 				}
-				out <- o
+				out.Send(o)
 			}
 			http.HandleFunc(url_parsed.Path, pubHandler)
 			http.ListenAndServe(url_parsed.Host, nil)
@@ -38,6 +39,6 @@ var newRESTSource = func(u string) Pipeline {
 	}
 }
 
-func init() {
-	Register("rest", newRESTSource)
+func SinkChannel(cs *message.MessageChannel) {
+	cs.Sink()
 }

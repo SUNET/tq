@@ -7,34 +7,33 @@ import (
 
 var Log = logrus.New()
 
-type Pipeline func(src <-chan message.Message) <-chan message.Message
-type PipelineFactory func(s string) Pipeline
-type Handler func(o message.Message) message.Message
+type Pipeline func(...*message.MessageChannel) *message.MessageChannel
 
-var PipelineFactories = map[string]PipelineFactory{}
-
-func Register(name string, pf PipelineFactory) {
-	PipelineFactories[name] = pf
+func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
+	return message.ProcessChannels(func(v message.Message) message.Message {
+		return v
+	}, cs...)
 }
 
-func IsPipelineFactory(name string) bool {
-	if _, ok := PipelineFactories[name]; ok {
-		return true
-	} else {
-		return false
+func WaitForAll(cs ...*message.MessageChannel) {
+	for _, c := range cs {
+		Log.Print(c)
+		c.Wait()
 	}
 }
 
-func NewPipelineFromHandler(h Handler) Pipeline {
-	return func(in <-chan message.Message) <-chan message.Message {
-		out := make(chan message.Message)
-		go func() {
-			o := h(<-out)
-			if o != nil {
-				out <- o
-			}
-			close(out)
-		}()
-		return out
-	}
+func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
+	return message.ProcessChannels(func(v message.Message) message.Message {
+		m, err := message.FromJson(v)
+		if err != nil {
+			Log.Errorf("Unable to serialize json: %s", err.Error())
+		} else {
+			Log.Print(string(m))
+		}
+		return v
+	}, cs...)
+}
+
+func RecvMessage(cs *message.MessageChannel) message.Message {
+	return cs.Recv()
 }
