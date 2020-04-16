@@ -10,7 +10,7 @@ import (
 var Log = logrus.New()
 
 type Message map[string]interface{}
-type MessageHandler func(Message) Message
+type MessageHandler func(Message) (Message, error)
 
 func ToJson(data []byte) (Message, error) {
 	var o Message

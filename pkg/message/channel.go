@@ -74,7 +74,12 @@ func ProcessChannels(h MessageHandler, cs ...*MessageChannel) *MessageChannel {
 	for _, c := range cs {
 		go func(in *MessageChannel) {
 			for v := range in.c {
-				out.Send(h(v))
+				o, err := h(v)
+				if err != nil {
+					Log.Error(err)
+				} else {
+					out.Send(o)
+				}
 			}
 			out.Done()
 		}(c)

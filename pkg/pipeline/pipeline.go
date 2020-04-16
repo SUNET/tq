@@ -10,8 +10,8 @@ var Log = logrus.New()
 type Pipeline func(...*message.MessageChannel) *message.MessageChannel
 
 func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
-	return message.ProcessChannels(func(v message.Message) message.Message {
-		return v
+	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
+		return v, nil
 	}, cs...)
 }
 
@@ -23,14 +23,15 @@ func WaitForAll(cs ...*message.MessageChannel) {
 }
 
 func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
-	return message.ProcessChannels(func(v message.Message) message.Message {
+	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
 		m, err := message.FromJson(v)
 		if err != nil {
 			Log.Errorf("Unable to serialize json: %s", err.Error())
+			return nil, err
 		} else {
 			Log.Print(string(m))
+			return v, nil
 		}
-		return v
 	}, cs...)
 }
 

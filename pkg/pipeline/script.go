@@ -16,7 +16,7 @@ func MakeScriptPipeline(cmd string) Pipeline {
 	}
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {
-		return message.ProcessChannels(func(o message.Message) message.Message {
+		return message.ProcessChannels(func(o message.Message) (message.Message, error) {
 			cmd := exec.Command(cmdline[0], cmdline[1:]...)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
@@ -27,12 +27,13 @@ func MakeScriptPipeline(cmd string) Pipeline {
 			cmd.Env = env
 			err := cmd.Run()
 			if err != nil {
-				Log.Fatalf("cmd.Run() failed with %s\n", err)
+				Log.Errorf("cmd.Run() failed with %s\n", err)
+				return nil, err
 			}
 			//TODO - encode output
 			m := make(message.Message)
 			m["ok"] = 1
-			return m
+			return m, nil
 		}, cs...)
 	}
 }

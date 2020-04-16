@@ -20,6 +20,7 @@ func SabreScope() sabre.Scope {
 	_ = scope.BindGo("timer", MakeTimer)
 	_ = scope.BindGo("sink", SinkChannel)
 	_ = scope.BindGo("recv", RecvMessage)
+	_ = scope.BindGo("kazaam", MakeKazaamPipeline)
 	_ = scope.BindGo("ngr", func() int { return runtime.NumGoroutine() })
 
 	return scope

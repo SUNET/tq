@@ -1,7 +1,0 @@
-#!./tq
-(def out (pub "tcp://127.0.0.1:9991"))
-;(def in1 (sub "tcp://127.0.0.1:9991"))
-(def onesec (timer "1s"))
-;(def ping (sink (out (timer "1s"))))
-
-(sink (log (out (onesec))))

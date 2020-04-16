@@ -19,14 +19,15 @@ func MakePublishPipeline(url string) Pipeline {
 	}
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {
-		return message.ProcessChannels(func(o message.Message) message.Message {
+		return message.ProcessChannels(func(o message.Message) (message.Message, error) {
 			data, err = message.FromJson(o)
 			if err != nil {
 				Log.Errorf("Error serializing json: %s", err)
+				return nil, err
 			} else {
 				sock.Send(data)
+				return o, nil
 			}
-			return o
 		}, cs...)
 	}
 }
