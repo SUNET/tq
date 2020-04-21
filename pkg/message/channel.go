@@ -135,6 +135,15 @@ func (src *MessageChannel) Recv() Message {
 	return v
 }
 
+func Fork(in *MessageChannel, out ...*MessageChannel) {
+	for o := range in.c {
+		in.nrecv++
+		for _, c := range out {
+			c.Send(o)
+		}
+	}
+}
+
 func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *MessageChannel {
 	out := NewMessageChannel(name, len(cs))
 	for _, c := range cs {
