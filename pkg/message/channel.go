@@ -10,13 +10,20 @@ import (
 
 type ChannelDB map[uint64]*MessageChannel
 
-func AllChannels() []*MessageChannel {
-	nch := len(Channels)
+func AllFinalChannels() []*MessageChannel {
+	nch := 0
+	for _, ch := range Channels {
+		if ch.IsFinal() {
+			nch++
+		}
+	}
 	chs := make([]*MessageChannel, nch)
 	i := 0
 	for _, ch := range Channels {
-		chs[i] = ch
-		i++
+		if ch.IsFinal() {
+			chs[i] = ch
+			i++
+		}
 	}
 	return chs
 }
@@ -30,6 +37,7 @@ type MessageChannel struct {
 	nrecv  int
 	nsent  int
 	name   string
+	final  bool
 	inputs []uint64
 }
 
@@ -46,6 +54,7 @@ func NewMessageChannel(name string, sz ...int) *MessageChannel {
 		c:      make(chan Message),
 		inputs: make([]uint64, 0, 3),
 		id:     id,
+		final:  true,
 		name:   name,
 	}
 	p.wg.Add(size)
@@ -57,12 +66,14 @@ func (channel *MessageChannel) MarshalJSON() ([]byte, error) {
 	j, err := json.Marshal(struct {
 		ID       uint64   `json:"id"`
 		Name     string   `json:"name"`
+		Final    bool     `json:"final"`
 		Received int      `json:"received,omitempty"`
 		Sent     int      `json:"sent,omitempty"`
 		Inputs   []uint64 `json:"inputs,omitempty"`
 	}{
 		ID:       channel.id,
 		Name:     channel.name,
+		Final:    channel.final,
 		Received: channel.nrecv,
 		Sent:     channel.nsent,
 		Inputs:   channel.inputs,
@@ -87,6 +98,10 @@ func (channel *MessageChannel) Done() {
 
 func (channel *MessageChannel) Close() {
 	close(channel.c)
+}
+
+func (channel *MessageChannel) IsFinal() bool {
+	return channel.final
 }
 
 func (dst *MessageChannel) Send(o Message) {
@@ -125,6 +140,7 @@ func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *Mess
 	for _, c := range cs {
 		go func(in *MessageChannel) {
 			out.inputs = append(out.inputs, in.id)
+			in.final = false
 			for v := range in.c {
 				in.nrecv++
 				o, err := h(v)

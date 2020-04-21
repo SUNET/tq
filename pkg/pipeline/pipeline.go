@@ -45,8 +45,12 @@ func SinkChannel(cs *message.MessageChannel) {
 
 func Run(cs ...*message.MessageChannel) {
 	if len(cs) == 0 || cs == nil {
-		cs = message.AllChannels()
+		cs = message.AllFinalChannels()
 	}
-	Log.Debug(cs)
-	SinkChannel(Merge(cs...))
+	Log.Debugf("running %d final channels", len(cs))
+	if len(cs) == 0 {
+		SinkChannel(cs[0])
+	} else {
+		SinkChannel(Merge(cs...))
+	}
 }

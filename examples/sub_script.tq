@@ -1,0 +1,5 @@
+(listen ":8081")
+(def in (sub "tcp://127.0.0.1:9991"))
+(def echo (script "/usr/bin/jq" "-r" "." "-"))
+(log (echo (in)))
+(run)
