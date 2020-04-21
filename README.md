@@ -22,7 +22,7 @@ Building a TinyQ service typically involves writing and running small lisp progr
 (run (onesec))
 ```
 
-Create a file named ping.tq and run it:
+Create a file named ping.tq with the above 2 lines and run it:
 
 ```bash
 # tq --loglevel=debug ping.tq
@@ -41,6 +41,15 @@ The run primitive can be called like in the example above or without arguments l
 - *script* <cmdline>: returns a message channel that runs the specified commandline for every message
 - *rest* <url>: returns a message channel that accepts JSON messages by POST/PUT to the specified url
 - *kazaam* <spec>: returns a message channel that transforms JSON using kazaam
+
+## She-Bang!
+
+TinyQ supports #! so you can do this after installing TinyQ:
+
+```bash
+#!/usr/bin/env tq
+; lisp code here...
+```
 
 ## Examples
 
