@@ -22,7 +22,7 @@ Alternatively use the provided Dockerfile to create a distroless docker image:
 
 ## Getting started
 
-TinyQ has a built-in tiny lisp (based on the sabre project) interpreter which can be started as a basic lisp RELP (Read EvaL Print) loop. The lisp environment comes with lambdas (functions) that is used to create message-based services. TinyQ messages are JSON-format but TinyQ doesn't really care about the content of the messages other than that they are syntactically correct JSON.
+TinyQ has a built-in tiny lisp (based on github.com/spy16/sabre) interpreter which can be started as a basic lisp RELP (Read EvaL Print) loop. The lisp environment comes with lambdas (functions) that is used to create message-based services. TinyQ messages are JSON-format but TinyQ doesn't really care about the content of the messages other than that they are syntactically correct JSON.
 
 Building a TinyQ service typically involves writing and running small lisp programs. The smallest possible example is a "ping":
 
