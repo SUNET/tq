@@ -45,6 +45,8 @@ The run primitive can be called like in the example above or without arguments l
 
 - *pub* <url>: returns a message channel that publishes to a specified URL
 - *sub* <url>: returns a message channel that subscribes to messages published to the URL
+- *push* <url>: returns a message channel that pushes messages to a specified URL
+- *pull* <url>: returns a message channel that pulls messages published to the URL
 - *listen* [<host>\*]:<port>: run the API endpoint on the specified host:port
 - *merge* <channel>\*: merge a set of channels into a single channel
 - *script* <cmdline>: returns a message channel that runs the specified commandline for every message
