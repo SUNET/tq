@@ -21,9 +21,9 @@ else
 PATH := $(subst :,/bin:,$(shell go env GOPATH))/bin:$(PATH)
 endif
 
-LDFLAGS := $(LDFLAGS) -X main.commit=$(COMMIT) -X main.branch=$(BRANCH)
+LDFLAGS := $(LDFLAGS) -X github.com/SUNET/tq/pkg/meta.commit=$(COMMIT) -X github.com/SUNET/tq/pkg/meta.branch=$(BRANCH)
 ifdef VERSION
-	LDFLAGS += -X main.version=$(VERSION)
+	LDFLAGS += -X github.com/SUNET/tq/pkg/meta.version=$(VERSION)
 endif
 
 .PHONY: all

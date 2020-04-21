@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/SUNET/tq/pkg/api"
 	"github.com/SUNET/tq/pkg/message"
+	"github.com/SUNET/tq/pkg/meta"
 	"github.com/SUNET/tq/pkg/pipeline"
 	"github.com/sirupsen/logrus"
 	"github.com/spy16/sabre/repl"
@@ -19,23 +21,9 @@ var helpFlag bool
 var relpFlag bool
 var logLevelFlag string
 
-var branch string
-var commit string
-var version string
-
 func usage(code int) {
 	fmt.Println("usage: tq [-h] [-e <expression>]")
 	os.Exit(code)
-}
-
-func ver() string {
-	if len(branch) > 0 && len(commit) > 0 {
-		return fmt.Sprintf("%s@%s", commit, branch)
-	} else if len(version) > 0 {
-		return fmt.Sprintf("v%s", version)
-	} else {
-		return "unknown"
-	}
 }
 
 func is_not_tty() bool {
@@ -65,6 +53,7 @@ func main() {
 	configLogger(Log, logLevelFlag)
 	configLogger(message.Log, logLevelFlag)
 	configLogger(pipeline.Log, logLevelFlag)
+	configLogger(api.Log, logLevelFlag)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -75,12 +64,12 @@ func main() {
 	files := flag.Args()
 	relpFlag = relpFlag || (len(files) == 0)
 
-	scope := pipeline.SabreScope()
+	scope := SabreScope()
 	srf := NewScriptReaderFactory()
 
 	if relpFlag {
 		repl.New(scope,
-			repl.WithBanner(fmt.Sprintf("tq shell [%s]", ver())),
+			repl.WithBanner(fmt.Sprintf("tq shell [%s]", meta.Version())),
 			repl.WithPrompts(">", "|"),
 			repl.WithReaderFactory(srf),
 		).Loop(context.Background())

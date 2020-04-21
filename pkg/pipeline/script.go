@@ -34,6 +34,6 @@ func MakeScriptPipeline(cmd string) Pipeline {
 			m := make(message.Message)
 			m["ok"] = 1
 			return m, nil
-		}, cs...)
+		}, "script", cs...)
 	}
 }

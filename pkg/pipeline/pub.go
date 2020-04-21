@@ -1,7 +1,10 @@
 package pipeline
 
 import (
+	"fmt"
+
 	"github.com/SUNET/tq/pkg/message"
+	"github.com/SUNET/tq/pkg/utils"
 	"go.nanomsg.org/mangos/v3"
 	"go.nanomsg.org/mangos/v3/protocol/pub"
 	_ "go.nanomsg.org/mangos/v3/transport/all"
@@ -17,6 +20,10 @@ func MakePublishPipeline(url string) Pipeline {
 	if err = sock.Listen(url); err != nil {
 		Log.Panicf("can't listen to pub %s on socket: %s", url, err.Error())
 	}
+	err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+	if err != nil {
+		Log.Panicf("cannot set TLS op: %s", err.Error())
+	}
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {
 		return message.ProcessChannels(func(o message.Message) (message.Message, error) {
@@ -28,6 +35,6 @@ func MakePublishPipeline(url string) Pipeline {
 				sock.Send(data)
 				return o, nil
 			}
-		}, cs...)
+		}, fmt.Sprintf("pub %s", url), cs...)
 	}
 }

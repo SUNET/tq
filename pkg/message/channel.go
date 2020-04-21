@@ -1,17 +1,36 @@
 package message
 
 import (
-	"fmt"
+	"encoding/json"
 	"sync"
 
 	"github.com/SUNET/tq/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
+type ChannelDB map[uint64]*MessageChannel
+
+func AllChannels() []*MessageChannel {
+	nch := len(Channels)
+	chs := make([]*MessageChannel, nch)
+	i := 0
+	for _, ch := range Channels {
+		chs[i] = ch
+		i++
+	}
+	return chs
+}
+
+var Channels ChannelDB
+
 type MessageChannel struct {
-	wg   sync.WaitGroup
-	c    chan Message
-	name string
+	id     uint64
+	wg     sync.WaitGroup
+	c      chan Message
+	nrecv  int
+	nsent  int
+	name   string
+	inputs []uint64
 }
 
 func NewMessageChannel(name string, sz ...int) *MessageChannel {
@@ -19,9 +38,39 @@ func NewMessageChannel(name string, sz ...int) *MessageChannel {
 	if len(sz) > 0 {
 		size = sz[0]
 	}
-	p := MessageChannel{c: make(chan Message), name: name}
+	id, err := utils.UniqueID()
+	if err != nil {
+		Log.Panic(err.Error())
+	}
+	p := MessageChannel{
+		c:      make(chan Message),
+		inputs: make([]uint64, 0, 3),
+		id:     id,
+		name:   name,
+	}
 	p.wg.Add(size)
+	Channels[p.id] = &p
 	return &p
+}
+
+func (channel *MessageChannel) MarshalJSON() ([]byte, error) {
+	j, err := json.Marshal(struct {
+		ID       uint64   `json:"id"`
+		Name     string   `json:"name"`
+		Received int      `json:"received,omitempty"`
+		Sent     int      `json:"sent,omitempty"`
+		Inputs   []uint64 `json:"inputs,omitempty"`
+	}{
+		ID:       channel.id,
+		Name:     channel.name,
+		Received: channel.nrecv,
+		Sent:     channel.nsent,
+		Inputs:   channel.inputs,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return j, nil
 }
 
 func (channel *MessageChannel) String() string {
@@ -47,6 +96,7 @@ func (dst *MessageChannel) Send(o Message) {
 			Log.Debugf("[OUT] %s => %s", s, dst.name)
 		}
 	}
+	dst.nsent++
 	dst.c <- o
 }
 
@@ -60,6 +110,7 @@ func (src *MessageChannel) Sink() {
 
 func (src *MessageChannel) Recv() Message {
 	v := <-src.c
+	src.nrecv++
 	if Log.IsLevelEnabled(logrus.DebugLevel) {
 		s, err := v.String()
 		if err == nil {
@@ -69,11 +120,13 @@ func (src *MessageChannel) Recv() Message {
 	return v
 }
 
-func ProcessChannels(h MessageHandler, cs ...*MessageChannel) *MessageChannel {
-	out := NewMessageChannel(fmt.Sprintf("handler [%s]", utils.GetFunctionName(h)), len(cs))
+func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *MessageChannel {
+	out := NewMessageChannel(name, len(cs))
 	for _, c := range cs {
 		go func(in *MessageChannel) {
+			out.inputs = append(out.inputs, in.id)
 			for v := range in.c {
+				in.nrecv++
 				o, err := h(v)
 				if err != nil {
 					Log.Error(err)
@@ -89,4 +142,8 @@ func ProcessChannels(h MessageHandler, cs ...*MessageChannel) *MessageChannel {
 		out.Close()
 	}()
 	return out
+}
+
+func init() {
+	Channels = make(ChannelDB)
 }

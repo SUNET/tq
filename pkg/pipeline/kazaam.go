@@ -31,6 +31,6 @@ func MakeKazaamPipeline(spec string) Pipeline {
 
 			return o, nil
 
-		}, cs...)
+		}, "kazaam", cs...)
 	}
 }

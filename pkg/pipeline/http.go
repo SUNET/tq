@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/SUNET/tq/pkg/api"
 	"github.com/SUNET/tq/pkg/message"
 )
 
@@ -32,13 +33,8 @@ func MakeRESTPipeline(u string) Pipeline {
 				}
 				out.Send(o)
 			}
-			http.HandleFunc(url_parsed.Path, pubHandler)
-			http.ListenAndServe(url_parsed.Host, nil)
+			api.Handler.HandleFunc(url_parsed.Path, pubHandler).Methods("POST")
 		}()
 		return out
 	}
-}
-
-func SinkChannel(cs *message.MessageChannel) {
-	cs.Sink()
 }

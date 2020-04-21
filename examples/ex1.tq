@@ -1,0 +1,5 @@
+(listen ":8080")
+(def uuid (kazaam "[{\"operation\": \"uuid\", \"spec\": { \"uuid\": { \"version\": 4 }}}]"))
+(def onesec (timer "1s"))
+(uuid (onesec))
+(run)

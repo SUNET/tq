@@ -12,7 +12,7 @@ type Pipeline func(...*message.MessageChannel) *message.MessageChannel
 func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
 	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
 		return v, nil
-	}, cs...)
+	}, "merge", cs...)
 }
 
 func WaitForAll(cs ...*message.MessageChannel) {
@@ -32,9 +32,21 @@ func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
 			Log.Print(string(m))
 			return v, nil
 		}
-	}, cs...)
+	}, "log", cs...)
 }
 
 func RecvMessage(cs *message.MessageChannel) message.Message {
 	return cs.Recv()
+}
+
+func SinkChannel(cs *message.MessageChannel) {
+	cs.Sink()
+}
+
+func Run(cs ...*message.MessageChannel) {
+	if len(cs) == 0 || cs == nil {
+		cs = message.AllChannels()
+	}
+	Log.Debug(cs)
+	SinkChannel(Merge(cs...))
 }
