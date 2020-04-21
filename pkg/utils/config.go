@@ -2,6 +2,8 @@ package utils
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 	"os"
 )
 
@@ -20,5 +22,15 @@ func init() {
 			panic(err)
 		}
 		cfg = &tls.Config{Certificates: []tls.Certificate{cert}}
+		clientCAPemFile := os.Getenv("TQ_TLS_CLIENT_CA")
+		if len(clientCAPemFile) > 0 {
+			cfg.ClientAuth = tls.RequireAndVerifyClientCert
+			cfg.ClientCAs = x509.NewCertPool()
+			pemCerts, err := ioutil.ReadFile(clientCAPemFile)
+			if err != nil {
+				panic(err)
+			}
+			cfg.ClientCAs.AppendCertsFromPEM(pemCerts)
+		}
 	}
 }

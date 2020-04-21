@@ -20,9 +20,12 @@ func MakePublishPipeline(url string) Pipeline {
 	if err = sock.Listen(url); err != nil {
 		Log.Panicf("can't listen to pub %s on socket: %s", url, err.Error())
 	}
-	err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
-	if err != nil {
-		Log.Panicf("cannot set TLS op: %s", err.Error())
+	_, err = sock.GetOption(mangos.OptionTLSConfig)
+	if err == nil {
+		err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+		if err != nil {
+			Log.Panicf("cannot set TLS op: %s", err.Error())
+		}
 	}
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {

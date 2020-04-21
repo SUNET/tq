@@ -36,9 +36,12 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 	if err != nil {
 		Log.Panicf("cannot subscribe (to '%s'): %s", string(topic), err.Error())
 	}
-	err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
-	if err != nil {
-		Log.Panicf("cannot set TLS op: %s", err.Error())
+	_, err = sock.GetOption(mangos.OptionTLSConfig)
+	if err == nil {
+		err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+		if err != nil {
+			Log.Panicf("cannot set TLS op: %s", err.Error())
+		}
 	}
 
 	return func(...*message.MessageChannel) *message.MessageChannel {
