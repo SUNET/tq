@@ -1,0 +1,2 @@
+(def onesec (timer "1s"))
+(run (onesec))
