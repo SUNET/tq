@@ -7,9 +7,18 @@
 
 ## Installing
 
+Install TinyQ using go get:
+
 ```bash
 # go get github.com/SUNET/tq
 ```
+
+Alternatively use the provided Dockerfile to create a distroless docker image:
+
+```bash
+# docker build -t tq .
+```
+
 
 ## Getting started
 
