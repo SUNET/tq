@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SUNET/tq/pkg/message"
+	"github.com/sunet/tq/pkg/message"
 )
 
 func MakeTimer(duration string) Pipeline {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/SUNET/tq/pkg/utils"
+	"github.com/sunet/tq/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 

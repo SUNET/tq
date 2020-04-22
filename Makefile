@@ -21,9 +21,9 @@ else
 PATH := $(subst :,/bin:,$(shell go env GOPATH))/bin:$(PATH)
 endif
 
-LDFLAGS := $(LDFLAGS) -X github.com/SUNET/tq/pkg/meta.commit=$(COMMIT) -X github.com/SUNET/tq/pkg/meta.branch=$(BRANCH)
+LDFLAGS := $(LDFLAGS) -X github.com/sunet/tq/pkg/meta.commit=$(COMMIT) -X github.com/sunet/tq/pkg/meta.branch=$(BRANCH)
 ifdef VERSION
-	LDFLAGS += -X github.com/SUNET/tq/pkg/meta.version=$(VERSION)
+	LDFLAGS += -X github.com/sunet/tq/pkg/meta.version=$(VERSION)
 endif
 
 .PHONY: all
@@ -95,5 +95,5 @@ clean:
 .PHONY: docker
 docker:
 	docker build -t "tq:$(COMMIT)" .
-	docker tag docker.sunet.se/tq:$(COMMIT) tq:$(COMMIT)
+	docker tag tq:$(COMMIT) docker.sunet.se/tq:$(COMMIT)
 	docker push docker.sunet.se/tq:$(COMMIT)

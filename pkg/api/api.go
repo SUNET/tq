@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/SUNET/tq/pkg/utils"
+	"github.com/sunet/tq/pkg/utils"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )

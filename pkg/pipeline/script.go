@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/SUNET/tq/pkg/message"
+	"github.com/sunet/tq/pkg/message"
 )
 
 func MakeScriptPipeline(cmdline ...string) Pipeline {

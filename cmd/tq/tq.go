@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SUNET/tq/pkg/api"
-	"github.com/SUNET/tq/pkg/message"
-	"github.com/SUNET/tq/pkg/meta"
-	"github.com/SUNET/tq/pkg/pipeline"
+	"github.com/sunet/tq/pkg/api"
+	"github.com/sunet/tq/pkg/message"
+	"github.com/sunet/tq/pkg/meta"
+	"github.com/sunet/tq/pkg/pipeline"
 	"github.com/sirupsen/logrus"
 	"github.com/spy16/sabre/repl"
 )

@@ -3,8 +3,8 @@ package pipeline
 import (
 	"fmt"
 
-	"github.com/SUNET/tq/pkg/message"
-	"github.com/SUNET/tq/pkg/utils"
+	"github.com/sunet/tq/pkg/message"
+	"github.com/sunet/tq/pkg/utils"
 	"go.nanomsg.org/mangos/v3"
 	"go.nanomsg.org/mangos/v3/protocol/pull"
 	_ "go.nanomsg.org/mangos/v3/transport/all"

@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/SUNET/tq/pkg/message"
-	"github.com/SUNET/tq/pkg/meta"
+	"github.com/sunet/tq/pkg/message"
+	"github.com/sunet/tq/pkg/meta"
 	"github.com/gorilla/mux"
 )
 

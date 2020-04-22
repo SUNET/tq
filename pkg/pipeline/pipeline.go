@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/SUNET/tq/pkg/message"
+	"github.com/sunet/tq/pkg/message"
 	"github.com/sirupsen/logrus"
 )
 

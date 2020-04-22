@@ -8,8 +8,8 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/SUNET/tq/pkg/api"
-	"github.com/SUNET/tq/pkg/message"
+	"github.com/sunet/tq/pkg/api"
+	"github.com/sunet/tq/pkg/message"
 )
 
 func MakePOSTPipeline(url string) Pipeline {
