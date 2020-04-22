@@ -8,7 +8,7 @@ else
 	VERSION := $(shell git describe --exact-match --tags 2>/dev/null)
 endif
 
-PREFIX := /usr/local
+PREFIX := /usr
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT := $(shell git rev-parse --short HEAD)
 GOFILES ?= $(shell git ls-files '*.go')
@@ -21,7 +21,7 @@ else
 PATH := $(subst :,/bin:,$(shell go env GOPATH))/bin:$(PATH)
 endif
 
-LDFLAGS := $(LDFLAGS) -X github.com/sunet/tq/pkg/meta.commit=$(COMMIT) -X github.com/sunet/tq/pkg/meta.branch=$(BRANCH)
+LDFLAGS := -X github.com/sunet/tq/pkg/meta.commit=$(COMMIT) -X github.com/sunet/tq/pkg/meta.branch=$(BRANCH)
 ifdef VERSION
 	LDFLAGS += -X github.com/sunet/tq/pkg/meta.version=$(VERSION)
 endif
