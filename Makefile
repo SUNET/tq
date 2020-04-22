@@ -92,6 +92,8 @@ clean:
 	rm -f tq
 	rm -f tq.exe
 
-.PHONY: docker-image
-docker-image:
-	docker build -f scripts/stretch.docker -t "tq:$(COMMIT)" .
+.PHONY: docker
+docker:
+	docker build -t "tq:$(COMMIT)" .
+	docker tag docker.sunet.se/tq:$(COMMIT) tq:$(COMMIT)
+	docker push docker.sunet.se/tq:$(COMMIT)
