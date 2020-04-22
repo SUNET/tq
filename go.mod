@@ -3,7 +3,7 @@ module github.com/sunet/tq
 go 1.13
 
 require (
-	github.com/SUNET/tq v0.0.0-20200421211356-d0c276de37be
+	github.com/sunet/tq v0.0.0-20200421211356-d0c276de37be
 	github.com/gorilla/mux v1.7.4
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/qntfy/kazaam v3.4.8+incompatible
