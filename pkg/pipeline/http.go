@@ -34,14 +34,14 @@ func MakePOSTPipeline(url string) Pipeline {
 			}
 			defer resp.Body.Close()
 
-			Log.Debugf("POST to %s got response status: %d", url, resp.Status)
+			Log.Debugf("POST to %s got response status: %v", url, resp.Status)
 			ct := resp.Header.Get("content-type")
 			mt, _, err := mime.ParseMediaType(ct)
 			body, _ := ioutil.ReadAll(resp.Body)
 			if mt == "application/json" {
 				return message.ToJson(body)
 			} else {
-				return message.Jsonf("{\"status\": %d,\"body\": \"%s\"}", resp.Status, string(body))
+				return message.Jsonf("{\"status\": %v,\"body\": \"%s\"}", resp.Status, string(body))
 			}
 		}, fmt.Sprintf("post %s", url), cs...)
 	}
