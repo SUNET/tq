@@ -1,14 +1,14 @@
-tinyq (0.0.1ubuntu2) xenial; urgency=medium
+tinyq (0.0.1ubuntu11) xenial; urgency=medium
 
-  * Fix build rules for lauchpad 
+  * fix build problems for the nth time 
 
- -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 12:26:10 +0200
+ -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 16:22:10 +0200
 
-tinyq (0.0.1build1) xenial; urgency=medium
+tinyq (0.0.1ubuntu10) xenial; urgency=medium
 
-  * Update build dependencies
+  * use custom vendor-enabled build-system
 
- -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 10:42:35 +0200
+ -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 16:21:38 +0200
 
 tinyq (0.0.1) xenial; urgency=medium
 

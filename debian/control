@@ -1,15 +1,23 @@
 Source: tinyq
 Maintainer: Leif Johansson <leifj@sunet.se>
-Section: admin
-Priority: optional
-Build-Depends: debhelper (>= 8), help2man, devscripts, golang-go, git
+Section: net
+Priority: extra
+Build-Depends: debhelper (>= 8), 
+               dh-golang,
+	       golang-pq-dev,
+               golang-go,
+               golang-godebiancontrol-dev,
+               golang-codesearch-dev,
+	       help2man,
+               devscripts,
+               git
 Standards-Version: 3.9.4
 Homepage: https://github.com/SUNET/tq
 Vcs-Browser: https://github.com/SUNET/tq
 Vcs-Git: git://github.com/SUNET/tq.git
 
 Package: tinyq
-Architecture: amd64
-Depends: ${misc:Depends}
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: The TinyQ message queue
   TinyQ (tq) is a golang-based, lisp-driven message q using naonmsg.org sockets

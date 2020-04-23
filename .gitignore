@@ -4,3 +4,5 @@ tq
 .idea
 vendor
 .cache
+.build
+obj-*

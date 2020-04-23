@@ -32,7 +32,7 @@ all:
 
 .PHONY: tq
 tq:
-	go build -ldflags "$(LDFLAGS)" ./cmd/tq
+	go build $(GO_BUILD_FLAGS) -ldflags "$(LDFLAGS)" ./cmd/tq
 
 .PHONY: go-install
 go-install:
@@ -99,7 +99,9 @@ docker:
 	docker push docker.sunet.se/tq:$(COMMIT)
 
 deb-source:
+	go mod vendor
 	dpkg-buildpackage -S -k$(DEBSIGN_KEYID)
 
 deb-bin:
+	go mod vendor
 	dpkg-buildpackage -k$(DEBSIGN_KEYID)
