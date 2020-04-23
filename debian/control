@@ -2,7 +2,7 @@ Source: tinyq
 Maintainer: Leif Johansson <leifj@sunet.se>
 Section: admin
 Priority: optional
-Build-Depends: debhelper (>= 8), help2man, devscripts, golang-go
+Build-Depends: debhelper (>= 8), help2man, devscripts, golang-go, git
 Standards-Version: 3.9.4
 Homepage: https://github.com/SUNET/tq
 Vcs-Browser: https://github.com/SUNET/tq

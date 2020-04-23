@@ -97,3 +97,6 @@ docker:
 	docker build -t "tq:$(COMMIT)" .
 	docker tag tq:$(COMMIT) docker.sunet.se/tq:$(COMMIT)
 	docker push docker.sunet.se/tq:$(COMMIT)
+
+deb:
+	dpkg-buildpackage -S -k$(DEBSIGN_KEYID)
