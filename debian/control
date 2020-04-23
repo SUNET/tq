@@ -3,11 +3,7 @@ Maintainer: Leif Johansson <leifj@sunet.se>
 Section: net
 Priority: extra
 Build-Depends: debhelper (>= 8), 
-               dh-golang,
-	       golang-pq-dev,
                golang-go,
-               golang-godebiancontrol-dev,
-               golang-codesearch-dev,
 	       help2man,
                devscripts,
                git

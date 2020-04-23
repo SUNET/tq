@@ -1,3 +1,15 @@
+tinyq (0.0.1ubuntu14) bionic; urgency=medium
+
+  * revert dh-golang deps 
+
+ -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 20:42:10 +0200
+
+tinyq (0.0.1ubuntu13) bionic; urgency=medium
+
+  * build on bionic 
+
+ -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 20:19:14 +0200
+
 tinyq (0.0.1ubuntu12) xenial; urgency=medium
 
   * fix tests?

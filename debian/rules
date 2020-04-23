@@ -3,10 +3,8 @@
 export HOME=$(CURDIR)
 export DPKG_EXPORT_BUILDFLAGS = 0
 export DH_OPTIONS
-#export DH_GOPKG := github.com/sunet/tq
-#export DH_GOLANG_INSTALL_ALL := 1
 export GOCACHE=$(CURDIR)/.cache
 export GO_BUILD_FLAGS=-mod vendor
 
 %:
-	dh $@ #--builddirectory=.build --buildsystem=golang --with=golang
+	dh $@
