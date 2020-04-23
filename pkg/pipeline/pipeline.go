@@ -1,8 +1,8 @@
 package pipeline
 
 import (
-	"github.com/sunet/tq/pkg/message"
 	"github.com/sirupsen/logrus"
+	"github.com/sunet/tq/pkg/message"
 )
 
 var Log = logrus.New()
@@ -49,6 +49,8 @@ func Run(cs ...*message.MessageChannel) {
 	}
 	Log.Debugf("running %d final channels", len(cs))
 	if len(cs) == 0 {
+		select {} // for some reason the user wants us to block forever...
+	} else if len(cs) == 1 {
 		SinkChannel(cs[0])
 	} else {
 		SinkChannel(Merge(cs...))
