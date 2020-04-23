@@ -1,3 +1,10 @@
+tinyq (0.1.0) xenial; urgency=medium
+
+  * systemd support
+  * load with glob
+
+ -- Leif Johansson <leifj@sunet.se>  Fri, 24 Apr 2020 00:53:51 +0200
+
 tinyq (0.0.1ubuntu14) bionic; urgency=medium
 
   * revert dh-golang deps 
