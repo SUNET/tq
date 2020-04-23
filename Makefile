@@ -46,7 +46,7 @@ install: tq
 
 .PHONY: test
 test:
-	go test -short ./...
+	go test $(GO_BUILD_FLAGS) -short ./...
 
 .PHONY: fmt
 fmt:
