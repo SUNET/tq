@@ -1,3 +1,9 @@
+tinyq (0.1.0~bionic1) bionic; urgency=medium
+
+  * bionic build
+
+ -- Leif Johansson <leifj@sunet.se>  Fri, 24 Apr 2020 00:58:15 +0200
+
 tinyq (0.1.0) xenial; urgency=medium
 
   * systemd support

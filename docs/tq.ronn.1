@@ -1,0 +1,57 @@
+tq(1) -- TinyQ
+==============
+
+## SYNOPSIS
+
+`tq` [--loglevel=<level>] <files>*
+
+## DESCRIPTIOPN
+
+* tq (pronounced "tiny queue") is a small self-contained message-bus relying heavily on nanomsg.org sockets to send and
+receive JSON messages.
+
+* tq is configured using small programs in a lisp-like dialect. 
+
+* tq is written in GO but is typically distributed as a self-contained binary
+
+## OPTIONS
+
+* `--loglevel`=<level>:
+  Set the loglevel. Default is "info". Options are warn,info,error and debug. Logging is always done on stdout
+
+## SYNTAX
+
+A tq script file is a lisp-syntax program which is executed by the built-in lisp interpreter. The primitives of 
+tq are represented by lisp lambdas which can be called and composed to control the behaviour of tq.
+
+## ENVIRONMENT
+
+Several functions of tq may be configured to use TLS - eg for HTTPS or for using TLS-based transport for nanommg.org
+sockets. TLS is configured using a few simple environment variables:
+
+* `TQ_TLS_CERT`
+  A file containing the PEM-encoded certificate (+ chain).
+
+* `TQ_TLS_KEY`
+  A file containing the PEM-encoded private key.
+
+* `TQ_TLS_CLIENT_CA`
+  A file containing the PEM-encoded certificates used to validate client certificates.
+
+If `TQ_TLS_CLIENT_CA` is set tq will require client certificate authentication for all connections.
+
+## AUTHOR
+
+tq is maintained by Leif Johansson <leifj@sunet.se>
+
+## SOURCE
+
+* [https://github.com/SUNET/tq](https://github.com/SUNET/tq)
+
+## COPYRIGHT
+
+tq is made available under a 2-clause BSD license. Copyright (2020) by the Swedish University Network.
+
+## SEE ALSO
+
+go(1)

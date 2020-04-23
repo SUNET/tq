@@ -33,11 +33,14 @@ endif
 
 .PHONY: all
 all:
-	@$(MAKE) --no-print-directory tq
+	@$(MAKE) --no-print-directory tq docs/tq.1
 
 .PHONY: tq
 tq:
 	go build $(GO_BUILD_FLAGS) -ldflags "$(LDFLAGS)" ./cmd/tq
+
+docs/%.1: docs/%.ronn.1
+	ronn -r $< > $@
 
 .PHONY: go-install
 go-install:
@@ -97,6 +100,7 @@ test-all: fmtcheck vet
 clean:
 	rm -f tq
 	rm -f tq.exe
+	rm -f docs/tq.1
 
 .PHONY: docker
 docker:

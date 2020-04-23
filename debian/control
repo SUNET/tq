@@ -3,6 +3,7 @@ Maintainer: Leif Johansson <leifj@sunet.se>
 Section: net
 Priority: extra
 Build-Depends: debhelper (>= 8), 
+               ruby-ronn,
                golang-go,
                dh-systemd,
 	       help2man,
