@@ -6,13 +6,15 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/sirupsen/logrus"
+	"github.com/spy16/sabre"
+	"github.com/spy16/sabre/repl"
 	"github.com/sunet/tq/pkg/api"
 	"github.com/sunet/tq/pkg/message"
 	"github.com/sunet/tq/pkg/meta"
 	"github.com/sunet/tq/pkg/pipeline"
-	"github.com/sirupsen/logrus"
-	"github.com/spy16/sabre/repl"
 )
 
 var Log = logrus.New()
@@ -40,6 +42,25 @@ func configLogger(log *logrus.Logger, ll string) {
 			log.Panicf("Unable to parse loglevel: %s", err.Error())
 		}
 		log.SetLevel(level)
+	}
+}
+
+func readEvalFiles(scope sabre.Scope, files ...string) {
+	srf := NewScriptReaderFactory()
+	for _, g := range files {
+		matches, _ := filepath.Glob(g)
+		for _, r := range matches {
+			Log.Debugf("About to load %s", r)
+			f, err := os.Open(r)
+			defer f.Close()
+			if err != nil {
+				Log.Fatalf("Unable to open %s: %s", r, err.Error())
+			}
+			_, err = srf.ReadEval(scope, bufio.NewReader(f))
+			if err != nil {
+				Log.Fatalf("Unable to execute %s: %s", r, err.Error())
+			}
+		}
 	}
 }
 
@@ -74,17 +95,7 @@ func main() {
 			repl.WithReaderFactory(srf),
 		).Loop(context.Background())
 	} else {
-		for _, r := range files {
-			f, err := os.Open(r)
-			defer f.Close()
-			if err != nil {
-				Log.Fatalf("Unable to open %s: %s", r, err.Error())
-			}
-			_, err = srf.ReadEval(scope, bufio.NewReader(f))
-			if err != nil {
-				Log.Fatalf("Unable to execute %s: %s", r, err.Error())
-			}
-		}
+		readEvalFiles(scope, files...)
 
 		if is_not_tty() {
 			_, err := srf.ReadEval(scope, os.Stdin)
