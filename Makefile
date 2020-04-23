@@ -9,11 +9,16 @@ else
 endif
 
 PREFIX := /usr
+BINDIR := $(PREFIX)/bin
+ETCDIR := /etc
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT := $(shell git rev-parse --short HEAD)
 GOFILES ?= $(shell git ls-files '*.go')
 GOFMT ?= $(shell gofmt -l -s $(filter-out plugins/parsers/influx/machine.go, $(GOFILES)))
 BUILDFLAGS ?=
+INSTALL := install
+INSTALL_EXEC := $(INSTALL) -D --mode 755
+INSTALL_DATA := $(INSTALL) -D --mode 0644
 
 ifdef GOBIN
 PATH := $(GOBIN):$(PATH)
@@ -40,8 +45,9 @@ go-install:
 
 .PHONY: install
 install: tq
-	mkdir -p $(DESTDIR)$(PREFIX)/bin/
-	cp tq $(DESTDIR)$(PREFIX)/bin/
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(ETCDIR)/tinyq/tinyq.d
+	$(INSTALL_EXEC) tq $(DESTDIR)$(BINDIR)
+	$(INSTALL_DATA) configs/tinyq.tq $(DESTDIR)$(ETCDIR)/tinyq/tinyq.tq
 
 
 .PHONY: test

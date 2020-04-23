@@ -1,5 +1,8 @@
-.debhelper
+*.debhelper
 tinyq.debhelper.log
 tinyq.substvars
 tinyq
 files
+debhelper-build-stamp
+.debhelper
+*.substvars

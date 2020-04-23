@@ -1,0 +1,8 @@
+#!/bin/sh
+# POSTINST for tinyq
+
+set -e
+
+#DEBHELPER#
+
+exit 0

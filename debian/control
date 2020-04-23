@@ -4,6 +4,7 @@ Section: net
 Priority: extra
 Build-Depends: debhelper (>= 8), 
                golang-go,
+               dh-systemd,
 	       help2man,
                devscripts,
                git

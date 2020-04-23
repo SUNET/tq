@@ -7,4 +7,4 @@ export GOCACHE=$(CURDIR)/.cache
 export GO_BUILD_FLAGS=-mod vendor
 
 %:
-	dh $@
+	dh $@ --with systemd
