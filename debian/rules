@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
-DPKG_EXPORT_BUILDFLAGS = 0
+export HOME=$(CURDIR)
+export DPKG_EXPORT_BUILDFLAGS = 0
 %:
 	dh $@
 
