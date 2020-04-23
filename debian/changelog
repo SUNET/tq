@@ -1,3 +1,9 @@
+tinyq (0.0.1build1) xenial; urgency=medium
+
+  * Update build dependencies
+
+ -- Leif Johansson <leifj@sunet.se>  Thu, 23 Apr 2020 10:42:35 +0200
+
 tinyq (0.0.1) xenial; urgency=medium
 
   * Initial release. 
