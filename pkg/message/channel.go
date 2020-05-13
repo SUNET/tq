@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/sunet/tq/pkg/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/sunet/tq/pkg/utils"
 )
+
+type MessageChannelSource func(Message) (*MessageChannel, error)
 
 type ChannelDB map[uint64]*MessageChannel
 
@@ -33,7 +35,8 @@ var Channels ChannelDB
 type MessageChannel struct {
 	id     uint64
 	wg     sync.WaitGroup
-	c      chan Message
+	Quit   chan bool
+	C      chan Message
 	nrecv  int
 	nsent  int
 	name   string
@@ -51,7 +54,8 @@ func NewMessageChannel(name string, sz ...int) *MessageChannel {
 		Log.Panic(err.Error())
 	}
 	p := MessageChannel{
-		c:      make(chan Message),
+		C:      make(chan Message),
+		Quit:   make(chan bool),
 		inputs: make([]uint64, 0, 3),
 		id:     id,
 		final:  true,
@@ -84,6 +88,10 @@ func (channel *MessageChannel) MarshalJSON() ([]byte, error) {
 	return j, nil
 }
 
+func (channel *MessageChannel) ID() uint64 {
+	return channel.id
+}
+
 func (channel *MessageChannel) String() string {
 	return channel.name
 }
@@ -97,7 +105,28 @@ func (channel *MessageChannel) Done() {
 }
 
 func (channel *MessageChannel) Close() {
-	close(channel.c)
+	inputs := channel.Inputs()
+	for id := range inputs {
+		inputs[id].Close()
+	}
+	channel.Quit <- true
+	defer close(channel.C)
+}
+
+func (channel *MessageChannel) Inputs() []*MessageChannel {
+	cs := make([]*MessageChannel, len(channel.inputs))
+	for i, id := range channel.inputs {
+		cs[i] = Channels[id]
+	}
+	return cs
+}
+
+func (channel *MessageChannel) SentCount() int {
+	return channel.nsent
+}
+
+func (channel *MessageChannel) RecvCount() int {
+	return channel.nrecv
 }
 
 func (channel *MessageChannel) IsFinal() bool {
@@ -112,19 +141,30 @@ func (dst *MessageChannel) Send(o Message) {
 		}
 	}
 	dst.nsent++
-	dst.c <- o
+	dst.C <- o
+}
+
+func (out *MessageChannel) AddInput(in *MessageChannel) {
+	out.inputs = append(out.inputs, in.id)
 }
 
 func (src *MessageChannel) Sink() {
 	for {
 		select {
-		case <-src.c:
+		case <-src.C:
 		}
 	}
 }
 
+func (dst *MessageChannel) Consume(src *MessageChannel) {
+	for v := range src.C {
+		src.nsent++
+		dst.Send(v)
+	}
+}
+
 func (src *MessageChannel) Recv() Message {
-	v := <-src.c
+	v := <-src.C
 	src.nrecv++
 	if Log.IsLevelEnabled(logrus.DebugLevel) {
 		s, err := v.String()
@@ -136,7 +176,7 @@ func (src *MessageChannel) Recv() Message {
 }
 
 func Fork(in *MessageChannel, out ...*MessageChannel) {
-	for o := range in.c {
+	for o := range in.C {
 		in.nrecv++
 		for _, c := range out {
 			c.Send(o)
@@ -144,13 +184,70 @@ func Fork(in *MessageChannel, out ...*MessageChannel) {
 	}
 }
 
+func ConnectChannels(source MessageSource, sink MessageSink, name string, cs ...*MessageChannel) *MessageChannel {
+	out := NewMessageChannel(name, len(cs))
+	go func(out *MessageChannel) {
+		o, err := source()
+		if err != nil {
+			Log.Error(err)
+		} else {
+			out.Send(o)
+		}
+	}(out)
+
+	for _, c := range cs {
+		go func(in *MessageChannel) {
+			out.AddInput(in)
+			in.final = false
+			for v := range in.C {
+				in.nrecv++
+				err := sink(v)
+				if err != nil {
+					Log.Error(err)
+				}
+			}
+			out.Done()
+		}(c)
+	}
+	go func() {
+		out.Wait()
+		out.Close()
+	}()
+	return out
+}
+
+func ConsumeChannels(h MessageChannelSource, name string, cs ...*MessageChannel) *MessageChannel {
+	out := NewMessageChannel(name, len(cs))
+	for _, c := range cs {
+		go func(in *MessageChannel) {
+			out.AddInput(in)
+			in.final = false
+			for v := range in.C {
+				in.nrecv++
+				src, err := h(v)
+				if err != nil {
+					Log.Error(err)
+				} else {
+					out.Consume(src)
+				}
+			}
+			out.Done()
+		}(c)
+	}
+	go func() {
+		out.Wait()
+		out.Close()
+	}()
+	return out
+}
+
 func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *MessageChannel {
 	out := NewMessageChannel(name, len(cs))
 	for _, c := range cs {
 		go func(in *MessageChannel) {
-			out.inputs = append(out.inputs, in.id)
+			out.AddInput(in)
 			in.final = false
-			for v := range in.c {
+			for v := range in.C {
 				in.nrecv++
 				o, err := h(v)
 				if err != nil {

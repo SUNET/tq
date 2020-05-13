@@ -1,0 +1,7 @@
+(def cmd (respondent "tcp://127.0.0.1:49910"))
+(def facter (script "facter" "-j"))
+(def cosmos (script "run-cosmos" "-v"))
+;(def factsF (filter (eq (path "$.command")) "facts"))
+;(cmd (facter (factsF (cmd))))
+(cmd (facter (cmd)))
+(run)

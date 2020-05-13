@@ -33,6 +33,13 @@ func is_not_tty() bool {
 	return (stat.Mode() & os.ModeCharDevice) == 0
 }
 
+func ConfigLoggers(logLevelFlag string) {
+	configLogger(Log, logLevelFlag)
+	configLogger(message.Log, logLevelFlag)
+	configLogger(pipeline.Log, logLevelFlag)
+	configLogger(api.Log, logLevelFlag)
+}
+
 func configLogger(log *logrus.Logger, ll string) {
 	log.Out = os.Stdout
 
@@ -45,8 +52,9 @@ func configLogger(log *logrus.Logger, ll string) {
 	}
 }
 
-func readEvalFiles(scope sabre.Scope, files ...string) {
+func readEvalFiles(scope sabre.Scope, files ...string) sabre.Value {
 	srf := NewScriptReaderFactory()
+	var v sabre.Value
 	for _, g := range files {
 		matches, _ := filepath.Glob(g)
 		for _, r := range matches {
@@ -56,12 +64,13 @@ func readEvalFiles(scope sabre.Scope, files ...string) {
 			if err != nil {
 				Log.Fatalf("Unable to open %s: %s", r, err.Error())
 			}
-			_, err = srf.ReadEval(scope, bufio.NewReader(f))
+			v, err = srf.ReadEval(scope, bufio.NewReader(f))
 			if err != nil {
 				Log.Fatalf("Unable to execute %s: %s", r, err.Error())
 			}
 		}
 	}
+	return v
 }
 
 func main() {
@@ -71,10 +80,7 @@ func main() {
 		usage(0)
 	}
 
-	configLogger(Log, logLevelFlag)
-	configLogger(message.Log, logLevelFlag)
-	configLogger(pipeline.Log, logLevelFlag)
-	configLogger(api.Log, logLevelFlag)
+	ConfigLoggers(logLevelFlag)
 
 	defer func() {
 		if r := recover(); r != nil {

@@ -11,9 +11,6 @@ import (
 )
 
 func MakeSubscribePipeline(args ...string) Pipeline {
-	var err error
-	var sock mangos.Socket
-
 	if len(args) < 1 {
 		Log.Panicf("sub requires at least one argument - the subscription URL")
 	}
@@ -26,10 +23,12 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 		topic = []byte("")
 	}
 
-	if sock, err = sub.NewSocket(); err != nil {
+	sock, err := sub.NewSocket()
+	if err != nil {
 		Log.Panicf("can't create sub socket: %s", err.Error())
 	}
-	if err = sock.Dial(url); err != nil {
+	err = sock.Dial(url)
+	if err != nil {
 		Log.Panicf("can't dial %s on socket: %s", url, err.Error())
 	}
 	err = sock.SetOption(mangos.OptionSubscribe, topic)
@@ -47,17 +46,11 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 	return func(...*message.MessageChannel) *message.MessageChannel {
 		out := message.NewMessageChannel(fmt.Sprintf("sub [%s]", url))
 		go func() {
-			var err error
-			var data []byte
-			var o message.Message
 			for {
-				if data, err = sock.Recv(); err != nil {
-					Log.Errorf("Cannot recv: %s", err.Error())
+				o, err := recvMessage(sock)
+				if err != nil {
+					out.Send(o)
 				}
-				if o, err = message.ToJson(data); err != nil {
-					Log.Errorf("Cannot parse json: %s", err.Error())
-				}
-				out.Send(o)
 			}
 		}()
 		return out

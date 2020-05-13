@@ -11,13 +11,12 @@ import (
 )
 
 func MakePushPipeline(url string) Pipeline {
-	var err error
-	var sock mangos.Socket
-	var data []byte
-	if sock, err = push.NewSocket(); err != nil {
+	sock, err := push.NewSocket()
+	if err != nil {
 		Log.Panicf("can't create push socket: %s", err.Error())
 	}
-	if err = sock.Listen(url); err != nil {
+	err = sock.Listen(url)
+	if err != nil {
 		Log.Panicf("can't listen to push %s on socket: %s", url, err.Error())
 	}
 	_, err = sock.GetOption(mangos.OptionTLSConfig)
@@ -30,14 +29,7 @@ func MakePushPipeline(url string) Pipeline {
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {
 		return message.ProcessChannels(func(o message.Message) (message.Message, error) {
-			data, err = message.FromJson(o)
-			if err != nil {
-				Log.Errorf("Error serializing json: %s", err)
-				return nil, err
-			} else {
-				sock.Send(data)
-				return o, nil
-			}
+			return sendMessage(sock, o)
 		}, fmt.Sprintf("push %s", url), cs...)
 	}
 }

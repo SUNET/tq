@@ -10,6 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.5.0
 	github.com/sony/sonyflake v1.0.0
 	github.com/spy16/sabre v0.3.3
+	github.com/stretchr/testify v1.2.2
 	go.nanomsg.org/mangos/v3 v3.0.1
 	gopkg.in/square/go-jose.v2 v2.5.0
 )

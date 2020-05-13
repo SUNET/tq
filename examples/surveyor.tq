@@ -1,0 +1,5 @@
+(listen ":8080")
+(def api (rest "/api/cmd"))
+(def cmd (surveyor "tcp://0.0.0.0:49910" "200s"))
+(cmd (api))
+(run)

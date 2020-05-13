@@ -11,13 +11,12 @@ import (
 )
 
 func MakePullPipeline(url string) Pipeline {
-	var err error
-	var sock mangos.Socket
-
-	if sock, err = pull.NewSocket(); err != nil {
+	sock, err := pull.NewSocket()
+	if err != nil {
 		Log.Panicf("can't create pull socket: %s", err.Error())
 	}
-	if err = sock.Dial(url); err != nil {
+	err = sock.Dial(url)
+	if err != nil {
 		Log.Panicf("can't dial %s on socket: %s", url, err.Error())
 	}
 	_, err = sock.GetOption(mangos.OptionTLSConfig)
@@ -31,17 +30,11 @@ func MakePullPipeline(url string) Pipeline {
 	return func(...*message.MessageChannel) *message.MessageChannel {
 		out := message.NewMessageChannel(fmt.Sprintf("pull [%s]", url))
 		go func() {
-			var err error
-			var data []byte
-			var o message.Message
 			for {
-				if data, err = sock.Recv(); err != nil {
-					Log.Errorf("Cannot recv: %s", err.Error())
+				o, err := recvMessage(sock)
+				if err != nil {
+					out.Send(o)
 				}
-				if o, err = message.ToJson(data); err != nil {
-					Log.Errorf("Cannot parse json: %s", err.Error())
-				}
-				out.Send(o)
 			}
 		}()
 		return out

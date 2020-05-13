@@ -9,6 +9,10 @@ var Log = logrus.New()
 
 type Pipeline func(...*message.MessageChannel) *message.MessageChannel
 
+func CallPipeline(p Pipeline, cs ...*message.MessageChannel) *message.MessageChannel {
+	return p(cs...)
+}
+
 func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
 	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
 		return v, nil

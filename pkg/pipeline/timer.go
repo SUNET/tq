@@ -16,17 +16,26 @@ func MakeTimer(duration string) Pipeline {
 
 	return func(...*message.MessageChannel) *message.MessageChannel {
 		out := message.NewMessageChannel(fmt.Sprintf("timer [%s]", duration))
+		ticker := time.NewTicker(d)
 		go func() {
-			for now := range time.Tick(d) {
-				t_bytes, err := now.MarshalJSON()
-				if err != nil {
-					Log.Errorf("Unable to create json: %s", err.Error())
+			defer out.Close()
+			for {
+				select {
+				case <-out.Quit:
+					Log.Debug("stopping timer")
+					ticker.Stop()
+					return
+				case now := <-ticker.C:
+					t_bytes, err := now.MarshalJSON()
+					if err != nil {
+						Log.Errorf("Unable to create json: %s", err.Error())
+					}
+					o, err := message.Jsonf("{\"timestamp\": %s}", string(t_bytes))
+					if err != nil {
+						Log.Errorf("Unable to create json: %s", err.Error())
+					}
+					out.Send(o)
 				}
-				o, err := message.Jsonf("{\"timestamp\": %s}", string(t_bytes))
-				if err != nil {
-					Log.Errorf("Unable to create json: %s", err.Error())
-				}
-				out.Send(o)
 			}
 		}()
 		return out
