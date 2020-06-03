@@ -1,2 +1,2 @@
-(load "examples/*.tq")
-(run)
+(tq/load "examples/*.tq")
+(tq/run)

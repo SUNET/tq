@@ -175,7 +175,7 @@ func (src *MessageChannel) Recv() Message {
 	return v
 }
 
-func Fork(in *MessageChannel, out ...*MessageChannel) {
+func ForkChannel(in *MessageChannel, out ...*MessageChannel) {
 	for o := range in.C {
 		in.nrecv++
 		for _, c := range out {
@@ -184,27 +184,14 @@ func Fork(in *MessageChannel, out ...*MessageChannel) {
 	}
 }
 
-func ConnectChannels(source MessageSource, sink MessageSink, name string, cs ...*MessageChannel) *MessageChannel {
-	out := NewMessageChannel(name, len(cs))
-	go func(out *MessageChannel) {
-		o, err := source()
-		if err != nil {
-			Log.Error(err)
-		} else {
-			out.Send(o)
-		}
-	}(out)
-
+func (out *MessageChannel) Process(sendToChannel MessageSender, cs ...*MessageChannel) *MessageChannel {
 	for _, c := range cs {
 		go func(in *MessageChannel) {
 			out.AddInput(in)
 			in.final = false
 			for v := range in.C {
 				in.nrecv++
-				err := sink(v)
-				if err != nil {
-					Log.Error(err)
-				}
+				sendToChannel(out, v)
 			}
 			out.Done()
 		}(c)
@@ -218,52 +205,26 @@ func ConnectChannels(source MessageSource, sink MessageSink, name string, cs ...
 
 func ConsumeChannels(h MessageChannelSource, name string, cs ...*MessageChannel) *MessageChannel {
 	out := NewMessageChannel(name, len(cs))
-	for _, c := range cs {
-		go func(in *MessageChannel) {
-			out.AddInput(in)
-			in.final = false
-			for v := range in.C {
-				in.nrecv++
-				src, err := h(v)
-				if err != nil {
-					Log.Error(err)
-				} else {
-					out.Consume(src)
-				}
-			}
-			out.Done()
-		}(c)
-	}
-	go func() {
-		out.Wait()
-		out.Close()
-	}()
-	return out
+	return out.Process(func(out *MessageChannel, m Message) {
+		src, err := h(m)
+		if err != nil {
+			Log.Error(err)
+		} else {
+			out.Consume(src)
+		}
+	}, cs...)
 }
 
 func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *MessageChannel {
 	out := NewMessageChannel(name, len(cs))
-	for _, c := range cs {
-		go func(in *MessageChannel) {
-			out.AddInput(in)
-			in.final = false
-			for v := range in.C {
-				in.nrecv++
-				o, err := h(v)
-				if err != nil {
-					Log.Error(err)
-				} else {
-					out.Send(o)
-				}
-			}
-			out.Done()
-		}(c)
-	}
-	go func() {
-		out.Wait()
-		out.Close()
-	}()
-	return out
+	return out.Process(func(out *MessageChannel, m Message) {
+		o, err := h(m)
+		if err != nil {
+			Log.Error(err)
+		} else {
+			out.Send(o)
+		}
+	}, cs...)
 }
 
 func init() {

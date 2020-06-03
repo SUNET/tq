@@ -19,13 +19,6 @@ func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
 	}, "merge", cs...)
 }
 
-func WaitForAll(cs ...*message.MessageChannel) {
-	for _, c := range cs {
-		Log.Print(c)
-		c.Wait()
-	}
-}
-
 func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
 	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
 		m, err := message.FromJson(v)
@@ -39,14 +32,6 @@ func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
 	}, "log", cs...)
 }
 
-func RecvMessage(cs *message.MessageChannel) message.Message {
-	return cs.Recv()
-}
-
-func SinkChannel(cs *message.MessageChannel) {
-	cs.Sink()
-}
-
 func Run(cs ...*message.MessageChannel) {
 	if len(cs) == 0 || cs == nil {
 		cs = message.AllFinalChannels()
@@ -55,8 +40,8 @@ func Run(cs ...*message.MessageChannel) {
 	if len(cs) == 0 {
 		select {} // for some reason the user wants us to block forever...
 	} else if len(cs) == 1 {
-		SinkChannel(cs[0])
+		cs[0].Sink()
 	} else {
-		SinkChannel(Merge(cs...))
+		Merge(cs...).Sink()
 	}
 }
