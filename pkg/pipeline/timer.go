@@ -26,11 +26,11 @@ func MakeTimer(duration string) Pipeline {
 					ticker.Stop()
 					return
 				case now := <-ticker.C:
-					t_bytes, err := now.MarshalJSON()
+					tBytes, err := now.MarshalJSON()
 					if err != nil {
 						Log.Errorf("Unable to create json: %s", err.Error())
 					}
-					o, err := message.Jsonf("{\"timestamp\": %s}", string(t_bytes))
+					o, err := message.Jsonf("{\"timestamp\": %s}", string(tBytes))
 					if err != nil {
 						Log.Errorf("Unable to create json: %s", err.Error())
 					}

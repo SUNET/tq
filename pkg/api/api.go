@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/sunet/tq/pkg/utils"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/sunet/tq/pkg/utils"
 )
 
 var Log = logrus.New()
@@ -34,7 +34,7 @@ func init() {
 	Handler.StrictSlash(true)
 
 	Handler.HandleFunc("/api/status", status).Methods("GET")
-	Handler.HandleFunc("/api/channels/all", all_channels).Methods("GET")
-	Handler.HandleFunc("/api/channels/list", list_channels).Methods("GET")
-	Handler.HandleFunc("/api/channel/{id}", show_channel).Methods("GET")
+	Handler.HandleFunc("/api/channels/all", allChannels).Methods("GET")
+	Handler.HandleFunc("/api/channels/list", listChannels).Methods("GET")
+	Handler.HandleFunc("/api/channel/{id}", showChannel).Methods("GET")
 }

@@ -5,6 +5,7 @@
 (def handler (fn* [msg]
      (core/case msg.cmd
                 ("facts"  (script/handler "facter" "-j" msg))
+                ("date"   (script/handler "date"))
                 ("cosmos" (script/handler "run-cosmos" "-v" msg)))))
 
 (cmd (tq/process handler "handler" (cmd)))

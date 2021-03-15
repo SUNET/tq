@@ -1,0 +1,3 @@
+(def in (syslog/udp "127.0.0.1:9514"))
+(in)
+(tq/run)

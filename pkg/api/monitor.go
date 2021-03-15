@@ -20,7 +20,7 @@ func status(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
-func all_channels(w http.ResponseWriter, r *http.Request) {
+func allChannels(w http.ResponseWriter, r *http.Request) {
 	result := make([]*message.MessageChannel, len(message.Channels))
 	i := 0
 	for _, ch := range message.Channels {
@@ -31,7 +31,7 @@ func all_channels(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func list_channels(w http.ResponseWriter, r *http.Request) {
+func listChannels(w http.ResponseWriter, r *http.Request) {
 	result := make([]string, len(message.Channels))
 	i := 0
 	for id, _ := range message.Channels {
@@ -42,7 +42,7 @@ func list_channels(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func show_channel(w http.ResponseWriter, r *http.Request) {
+func showChannel(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idstr := vars["id"]
 	id, err := strconv.ParseUint(idstr, 10, 64)

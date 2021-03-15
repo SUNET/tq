@@ -29,7 +29,7 @@ func usage(code int) {
 	os.Exit(code)
 }
 
-func is_not_tty() bool {
+func isNotTty() bool {
 	stat, _ := os.Stdin.Stat()
 	return (stat.Mode() & os.ModeCharDevice) == 0
 }
@@ -102,7 +102,7 @@ func main() {
 	} else {
 		readEvalFiles(sl, files...)
 
-		if is_not_tty() {
+		if isNotTty() {
 			_, err := srf.ReadEval(sl, os.Stdin)
 			if err != nil {
 				Log.Fatalf("Unable to execute from stdin: %s", err.Error())

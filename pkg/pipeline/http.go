@@ -20,7 +20,7 @@ func MakePOSTPipeline(url string) Pipeline {
 
 func MakeRESTPipeline(path string) Pipeline {
 	return func(...*message.MessageChannel) *message.MessageChannel {
-		out := message.NewMessageChannel(fmt.Sprintf("http [%s]", path))
+		out := message.NewMessageChannel(fmt.Sprintf("httpd [%s]", path))
 		go func() {
 			pubHandler := func(w http.ResponseWriter, req *http.Request) {
 				var err error

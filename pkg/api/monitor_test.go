@@ -39,7 +39,7 @@ func TestAllChannelHandler(t *testing.T) {
 	assert.True(t, ch.IsFinal())
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(all_channels)
+	handler := http.HandlerFunc(allChannels)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, http.StatusOK, "channels all returns 200")
 	var o []message.Message = make([]message.Message, 1)
@@ -58,7 +58,7 @@ func TestListChannelHandler(t *testing.T) {
 	assert.True(t, ch.IsFinal())
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(list_channels)
+	handler := http.HandlerFunc(listChannels)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, http.StatusOK, "channels list returns 200")
 	var o []string = make([]string, 1)

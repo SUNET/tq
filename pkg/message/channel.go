@@ -133,43 +133,43 @@ func (channel *MessageChannel) IsFinal() bool {
 	return channel.final
 }
 
-func (dst *MessageChannel) Send(o Message) {
+func (channel *MessageChannel) Send(o Message) {
 	if Log.IsLevelEnabled(logrus.DebugLevel) {
 		s, err := o.String()
 		if err == nil {
-			Log.Debugf("[OUT] %s => %s", s, dst.name)
+			Log.Debugf("[OUT] %v => %v", s, channel)
 		}
 	}
-	dst.nsent++
-	dst.C <- o
+	channel.nsent++
+	channel.C <- o
 }
 
-func (out *MessageChannel) AddInput(in *MessageChannel) {
-	out.inputs = append(out.inputs, in.id)
+func (channel *MessageChannel) AddInput(in *MessageChannel) {
+	channel.inputs = append(channel.inputs, in.id)
 }
 
-func (src *MessageChannel) Sink() {
+func (channel *MessageChannel) Sink() {
 	for {
 		select {
-		case <-src.C:
+		case <-channel.C:
 		}
 	}
 }
 
-func (dst *MessageChannel) Consume(src *MessageChannel) {
+func (channel *MessageChannel) Consume(src *MessageChannel) {
 	for v := range src.C {
 		src.nsent++
-		dst.Send(v)
+		channel.Send(v)
 	}
 }
 
-func (src *MessageChannel) Recv() Message {
-	v := <-src.C
-	src.nrecv++
+func (channel *MessageChannel) Recv() Message {
+	v := <-channel.C
+	channel.nrecv++
 	if Log.IsLevelEnabled(logrus.DebugLevel) {
 		s, err := v.String()
 		if err == nil {
-			Log.Debugf("[IN] %s <= %s", src.name, s)
+			Log.Debugf("[IN] %v <= %v", channel, s)
 		}
 	}
 	return v
@@ -184,23 +184,23 @@ func ForkChannel(in *MessageChannel, out ...*MessageChannel) {
 	}
 }
 
-func (out *MessageChannel) Process(sendToChannel MessageSender, cs ...*MessageChannel) *MessageChannel {
+func (channel *MessageChannel) Process(sendToChannel MessageSender, cs ...*MessageChannel) *MessageChannel {
 	for _, c := range cs {
 		go func(in *MessageChannel) {
-			out.AddInput(in)
+			channel.AddInput(in)
 			in.final = false
 			for v := range in.C {
 				in.nrecv++
-				sendToChannel(out, v)
+				sendToChannel(channel, v)
 			}
-			out.Done()
+			channel.Done()
 		}(c)
 	}
 	go func() {
-		out.Wait()
-		out.Close()
+		channel.Wait()
+		channel.Close()
 	}()
-	return out
+	return channel
 }
 
 func ConsumeChannels(h MessageChannelSource, name string, cs ...*MessageChannel) *MessageChannel {

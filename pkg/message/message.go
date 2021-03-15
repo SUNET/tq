@@ -11,9 +11,7 @@ var Log = logrus.New()
 
 type Message map[string]interface{}
 type MessageHandler func(Message) (Message, error)
-type MessageSink func(Message) error
 type MessageSender func(*MessageChannel, Message)
-type MessageSource func() (Message, error)
 
 func ToJson(data []byte) (Message, error) {
 	var o Message
@@ -26,12 +24,12 @@ func FromJson(o Message) ([]byte, error) {
 }
 
 func Jsonf(format string, args ...interface{}) (Message, error) {
-	json_str := fmt.Sprintf(format, args...)
-	return ToJson([]byte(json_str))
+	jsonStr := fmt.Sprintf(format, args...)
+	return ToJson([]byte(jsonStr))
 }
 
-func (v *Message) String() (string, error) {
-	s, err := FromJson(*v)
+func (msg *Message) String() (string, error) {
+	s, err := FromJson(*msg)
 	if err == nil {
 		return string(s), nil
 	} else {
