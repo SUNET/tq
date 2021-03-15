@@ -3,6 +3,7 @@ package pipeline
 import (
 	"fmt"
 	"github.com/sunet/tq/pkg/utils"
+	"log"
 
 	"github.com/sunet/tq/pkg/message"
 	"gopkg.in/mcuadros/go-syslog.v2"
@@ -10,21 +11,18 @@ import (
 
 func MakeSyslogUDP(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
-		server.SetFormat(syslog.RFC5424)
 		server.ListenUDP(hostport)
 	})
 }
 
 func MakeSyslogTCP(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
-		server.SetFormat(syslog.RFC5424)
 		server.ListenTCP(hostport)
 	})
 }
 
 func MakeSyslogTCPTLS(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
-		server.SetFormat(syslog.RFC5424)
 		cfg := utils.GetTLSConfig()
 		server.ListenTCPTLS(hostport, cfg)
 	})
@@ -32,7 +30,6 @@ func MakeSyslogTCPTLS(hostport string) Pipeline {
 
 func MakeSyslogUnix(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
-		server.SetFormat(syslog.RFC5424)
 		server.ListenUnixgram(hostport)
 	})
 }
@@ -45,6 +42,9 @@ func MakeSyslog(hostport string, setup func (server *syslog.Server)) Pipeline {
 	server.SetHandler(handler)
 
 	setup(server)
+
+	server.SetFormat(syslog.Automatic)
+
 	server.Boot()
 
 	return func(...*message.MessageChannel) *message.MessageChannel {
@@ -54,6 +54,7 @@ func MakeSyslog(hostport string, setup func (server *syslog.Server)) Pipeline {
 			defer server.Kill()
 
 			for logParts := range channel {
+				log.Printf("%s", logParts)
 				out.Send(message.Message(logParts))
 			}
 		}(channel)

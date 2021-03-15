@@ -134,10 +134,10 @@ func (channel *MessageChannel) IsFinal() bool {
 }
 
 func (channel *MessageChannel) Send(o Message) {
-	if Log.IsLevelEnabled(logrus.DebugLevel) {
+	if Log.IsLevelEnabled(logrus.TraceLevel) {
 		s, err := o.String()
 		if err == nil {
-			Log.Debugf("[OUT] %v => %v", s, channel)
+			Log.Tracef("[OUT] %v => %v", s, channel)
 		}
 	}
 	channel.nsent++
@@ -166,10 +166,10 @@ func (channel *MessageChannel) Consume(src *MessageChannel) {
 func (channel *MessageChannel) Recv() Message {
 	v := <-channel.C
 	channel.nrecv++
-	if Log.IsLevelEnabled(logrus.DebugLevel) {
+	if Log.IsLevelEnabled(logrus.TraceLevel) {
 		s, err := v.String()
 		if err == nil {
-			Log.Debugf("[IN] %v <= %v", channel, s)
+			Log.Tracef("[IN] %v <= %v", channel, s)
 		}
 	}
 	return v
