@@ -2,10 +2,8 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/sunet/tq/pkg/utils"
-	"log"
-
 	"github.com/sunet/tq/pkg/message"
+	"github.com/sunet/tq/pkg/utils"
 	"gopkg.in/mcuadros/go-syslog.v2"
 )
 
@@ -54,7 +52,6 @@ func MakeSyslog(hostport string, setup func (server *syslog.Server)) Pipeline {
 			defer server.Kill()
 
 			for logParts := range channel {
-				log.Printf("%s", logParts)
 				out.Send(message.Message(logParts))
 			}
 		}(channel)

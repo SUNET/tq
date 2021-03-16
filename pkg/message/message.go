@@ -11,6 +11,7 @@ var Log = logrus.New()
 
 type Message map[string]interface{}
 type MessageHandler func(Message) (Message, error)
+type MessageFilter func(Message) bool
 type MessageSender func(*MessageChannel, Message)
 
 func ToJson(data []byte) (Message, error) {

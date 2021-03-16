@@ -19,6 +19,15 @@ func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
 	}, "merge", cs...)
 }
 
+func Fork(in *message.MessageChannel) Pipeline {
+	return func(out ...*message.MessageChannel) *message.MessageChannel {
+		go func(out ...*message.MessageChannel) {
+			message.ForkChannel(in, out...)
+		}(out...)
+		return Merge(out...)
+	}
+}
+
 func LogMessages(cs ...*message.MessageChannel) *message.MessageChannel {
 	return message.ProcessChannels(func(v message.Message) (message.Message, error) {
 		m, err := message.FromJson(v)

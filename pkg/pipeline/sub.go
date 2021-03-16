@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/sunet/tq/pkg/message"
 	"github.com/sunet/tq/pkg/utils"
@@ -48,6 +49,12 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 		go func() {
 			for {
 				o, err := recvMessage(sock)
+				if Log.IsLevelEnabled(logrus.TraceLevel) {
+					s, err := o.String()
+					if err == nil {
+						Log.Tracef("[SUB] %v <= %v", args, s)
+					}
+				}
 				if err != nil {
 					out.Send(o)
 				}

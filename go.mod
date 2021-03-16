@@ -3,6 +3,7 @@ module github.com/sunet/tq
 go 1.14
 
 require (
+	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/qntfy/jsonparser v1.0.2 // indirect

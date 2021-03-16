@@ -227,6 +227,15 @@ func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *Mess
 	}, cs...)
 }
 
+func FilterChannels(h MessageFilter, name string, cs ...*MessageChannel) *MessageChannel {
+	out := NewMessageChannel(name, len(cs))
+	return out.Process(func(out *MessageChannel, m Message) {
+		if h(m) {
+			out.Send(m)
+		}
+	}, cs...)
+}
+
 func init() {
 	Channels = make(ChannelDB)
 }
