@@ -2,6 +2,7 @@ package message
 
 import (
 	"encoding/json"
+	"log"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -176,6 +177,10 @@ func (channel *MessageChannel) Recv() Message {
 }
 
 func ForkChannel(in *MessageChannel, out ...*MessageChannel) {
+	in.final = false
+	for _, c := range out {
+		c.AddInput(in)
+	}
 	for o := range in.C {
 		in.nrecv++
 		for _, c := range out {
@@ -228,6 +233,7 @@ func ProcessChannels(h MessageHandler, name string, cs ...*MessageChannel) *Mess
 }
 
 func FilterChannels(h MessageFilter, name string, cs ...*MessageChannel) *MessageChannel {
+	log.Printf("FilterChannels %v from %v...", name, cs)
 	out := NewMessageChannel(name, len(cs))
 	return out.Process(func(out *MessageChannel, m Message) {
 		if h(m) {

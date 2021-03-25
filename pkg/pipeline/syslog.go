@@ -9,13 +9,13 @@ import (
 
 func MakeSyslogUDP(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
+		server.SetFormat(syslog.RFC3164)
 		server.ListenUDP(hostport)
 	})
 }
 
 func MakeSyslogTCP(hostport string) Pipeline {
 	return MakeSyslog(hostport, func(server *syslog.Server) {
-		server.ListenTCP(hostport)
 	})
 }
 

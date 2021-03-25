@@ -2,30 +2,56 @@ package pipeline
 
 import (
 	"fmt"
+	"go.nanomsg.org/mangos/v3/protocol"
+	"time"
 
 	"github.com/sunet/tq/pkg/message"
 	"github.com/sunet/tq/pkg/utils"
 	"go.nanomsg.org/mangos/v3"
 	"go.nanomsg.org/mangos/v3/protocol/respondent"
+	"github.com/avast/retry-go"
 	_ "go.nanomsg.org/mangos/v3/transport/all"
 )
 
-func MakeRespondentPipeline(url string) Pipeline {
-	var err error
-	var sock mangos.Socket
+func MakeRespondentPipeline(args ...string) Pipeline {
+	url := args[0]
+	delay := "3s"
+	if len(args) > 1 {
+		delay = args[1]
+	}
 
-	if sock, err = respondent.NewSocket(); err != nil {
-		Log.Panicf("can't create pull socket: %s", err.Error())
+	sleepTime, err := time.ParseDuration(delay)
+	if err != nil {
+		Log.Panicf("Unable to parse duration %s", delay)
 	}
-	if err = sock.Dial(url); err != nil {
-		Log.Panicf("can't dial %s on socket: %s", url, err.Error())
-	}
-	_, err = sock.GetOption(mangos.OptionTLSConfig)
-	if err == nil {
-		err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
-		if err != nil {
-			Log.Panicf("cannot set TLS op: %s", err.Error())
+
+	var sock protocol.Socket
+
+	err = retry.Do(func() error {
+
+		if sock, err = respondent.NewSocket(); err != nil {
+			Log.Warnf("can't create pull socket: %s", err.Error())
 		}
+		if err = sock.Dial(url); err != nil {
+			Log.Warnf("can't dial %s on socket: %s", url, err.Error())
+		}
+		_, err = sock.GetOption(mangos.OptionTLSConfig)
+		if err == nil {
+			err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+			if err != nil {
+				Log.Warnf("cannot set TLS op: %s", err.Error())
+			}
+		}
+
+		if err != nil {
+			Log.Warnf("Retrying in %v...", sleepTime)
+			time.Sleep(sleepTime)
+		}
+		return err
+	})
+
+	if err != nil {
+		Log.Panicf("Giving up!")
 	}
 
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {

@@ -1,11 +1,11 @@
 (tq/listen ":8080")
 (def out (nanomsg/pub "tcp://127.0.0.1:9991"))
-(def in (syslog/udp "127.0.0.1:9514"))
+(def in (syslog/udp "127.0.0.1:9515"))
 
 (tq/run (out
-            ((tq/fork (in))
-                 ((filter/any "$.hostname" "klapautius"))
-                 ((filter/any "$.apparmor" "DENIED"))
+            (tq/fork
+                    (in)
+                    (filter/any "$.content" "NXDOMAIN")
             )
         )
 )

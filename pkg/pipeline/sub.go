@@ -3,11 +3,14 @@ package pipeline
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"go.nanomsg.org/mangos/v3/protocol"
+	"time"
 
 	"github.com/sunet/tq/pkg/message"
 	"github.com/sunet/tq/pkg/utils"
 	"go.nanomsg.org/mangos/v3"
 	"go.nanomsg.org/mangos/v3/protocol/sub"
+	"github.com/avast/retry-go"
 	_ "go.nanomsg.org/mangos/v3/transport/all"
 )
 
@@ -18,30 +21,54 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 
 	url := args[0]
 	var topic []byte
+	delay := "3s"
 	if len(args) > 1 {
 		topic = []byte(args[1])
 	} else {
 		topic = []byte("")
 	}
+	if len(args) > 2 {
+		delay = args[2]
+	}
 
-	sock, err := sub.NewSocket()
+	sleepTime, err := time.ParseDuration(delay)
 	if err != nil {
-		Log.Panicf("can't create sub socket: %s", err.Error())
+		Log.Panicf("Unable to parse duration %s", delay)
 	}
-	err = sock.Dial(url)
-	if err != nil {
-		Log.Panicf("can't dial %s on socket: %s", url, err.Error())
-	}
-	err = sock.SetOption(mangos.OptionSubscribe, topic)
-	if err != nil {
-		Log.Panicf("cannot subscribe (to '%s'): %s", string(topic), err.Error())
-	}
-	_, err = sock.GetOption(mangos.OptionTLSConfig)
-	if err == nil {
-		err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+
+	var sock protocol.Socket
+
+	err = retry.Do(func() error {
+
+		sock, err := sub.NewSocket()
 		if err != nil {
-			Log.Panicf("cannot set TLS op: %s", err.Error())
+			Log.Warnf("can't create sub socket: %s", err.Error())
 		}
+		err = sock.Dial(url)
+		if err != nil {
+			Log.Warnf("can't dial %s on socket: %s", url, err.Error())
+		}
+		err = sock.SetOption(mangos.OptionSubscribe, topic)
+		if err != nil {
+			Log.Warnf("cannot subscribe (to '%s'): %s", string(topic), err.Error())
+		}
+		_, err = sock.GetOption(mangos.OptionTLSConfig)
+		if err == nil {
+			err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
+			if err != nil {
+				Log.Warnf("cannot set TLS op: %s", err.Error())
+			}
+		}
+
+		if err != nil {
+			Log.Warnf("Retrying in %v...", sleepTime)
+			time.Sleep(sleepTime)
+		}
+		return err
+	})
+
+	if err != nil {
+		Log.Panicf("Giving up!")
 	}
 
 	return func(...*message.MessageChannel) *message.MessageChannel {

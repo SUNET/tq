@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus/hooks/writer"
 	"os"
 	"path/filepath"
 
@@ -44,11 +43,6 @@ func ConfigLoggers(logLevelFlag string) {
 
 func configLogger(log *logrus.Logger, ll string) {
 	log.SetOutput(os.Stdout)
-
-	log.AddHook(&writer.Hook{
-		Writer: os.Stderr,
-		LogLevels: []logrus.Level{ logrus.TraceLevel },
-	})
 
 	if len(ll) > 0 {
 		level, err := logrus.ParseLevel(logLevelFlag)
