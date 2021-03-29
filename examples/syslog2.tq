@@ -6,6 +6,7 @@
             (tq/fork
                     (in)
                     (filter/any "$.message" "NXDOMAIN")
+                    (filter/any "$.content" "NXDOMAIN")
             )
         )
 )
