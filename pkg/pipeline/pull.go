@@ -28,27 +28,31 @@ func MakePullPipeline(args ...string) Pipeline {
 	var sock protocol.Socket
 
 	err = retry.Do(func() error {
+		if err != nil {
+			Log.Warnf("Retrying in %v...", sleepTime)
+			time.Sleep(sleepTime)
+		}
+
 		sock, err = pull.NewSocket()
 		if err != nil {
 			Log.Warnf("can't create pull socket: %s", err.Error())
+			return err
 		}
 		err = sock.Dial(url)
 		if err != nil {
 			Log.Warnf("can't dial %s on socket: %s", url, err.Error())
+			return err
 		}
 		_, err = sock.GetOption(mangos.OptionTLSConfig)
 		if err == nil {
 			err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
 			if err != nil {
 				Log.Warnf("cannot set TLS op: %s", err.Error())
+				return err
 			}
 		}
 
-		if err != nil {
-			Log.Warnf("Retrying in %v...", sleepTime)
-			time.Sleep(sleepTime)
-		}
-		return err
+		return nil
 	})
 
 	if err != nil {

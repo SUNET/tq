@@ -44,24 +44,13 @@ func regCompileAll(list []string) []*regexp.Regexp {
 
 func MakeMatchAnyFilter(path string, values ...string) Pipeline {
 	regs := regCompileAll(values)
-	Log.Debugf("regs: %v", regs)
 	return func(cs ...*message.MessageChannel) *message.MessageChannel {
 		return message.FilterChannels(func(o message.Message) bool {
-			Log.Debugf("filtering ----- %v", o)
-			pathValues, err := jsonpath.Get(path, o)
-			Log.Debugf("%v", pathValues)
-			if err != nil {
-				Log.Fatal(err)
-				Log.Exit(1)
-			} else {
-				for _, v := range pathValues.([]string) {
-					Log.Debug(v)
-					if stringInSlice(v, regs) {
-						Log.Debugf("%v", v)
-						return true
-					}
+			pathValues, err := jsonpath.Get(path, map[string]interface{}(o))
+			if err == nil {
+				if stringInSlice(pathValues.(string), regs) {
+					return true
 				}
-
 			}
 			return false
 		}, fmt.Sprintf("any %s in %s", path, values), cs...)

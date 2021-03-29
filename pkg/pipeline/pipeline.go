@@ -3,7 +3,7 @@ package pipeline
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/spy16/sabre"
+	"github.com/spy16/slurp/core"
 	"github.com/sunet/tq/pkg/message"
 )
 
@@ -11,7 +11,20 @@ var Log = logrus.New()
 
 type Pipeline func(...*message.MessageChannel) *message.MessageChannel
 
-func CallPipeline(p Pipeline, cs ...*message.MessageChannel) *message.MessageChannel {
+func (p Pipeline) Invoke(args ...core.Any) (core.Any, error) {
+	vals := make([]*message.MessageChannel, len(args))
+	for i, _ := range args {
+		v, ok := args[i].(*message.MessageChannel)
+		if !ok {
+			Log.Panicf("Unable to convert %v to a MessageChannel", args[i])
+		} else {
+			vals[i] = v
+		}
+	}
+	return p.Call(vals...), nil
+}
+
+func (p Pipeline) Call(cs ...*message.MessageChannel) *message.MessageChannel {
 	return p(cs...)
 }
 
@@ -21,12 +34,12 @@ func Merge(cs ...*message.MessageChannel) *message.MessageChannel {
 	}, fmt.Sprintf("merge of %v", cs), cs...)
 }
 
-func ForkAndMerge(in *message.MessageChannel, pipelines ...*sabre.Fn) *message.MessageChannel {
+func ForkAndMerge(in *message.MessageChannel, pipelines ...Pipeline) *message.MessageChannel {
 	inputs := make([]*message.MessageChannel, len(pipelines))
 	outputs := make([]*message.MessageChannel, len(pipelines))
 	for i, p := range pipelines {
-		inputs[i] = message.NewMessageChannel(fmt.Sprintf("input[%d]", i))
-		outputs[i] = (*p)(inputs[i])
+		inputs[i] = message.NewMessageChannel(fmt.Sprintf("input %d of fork of %v", i, in))
+		outputs[i] = p.Call(inputs[i])
 	}
 	go func(inputs ...*message.MessageChannel) {
 		message.ForkChannel(in, inputs...)

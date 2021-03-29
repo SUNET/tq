@@ -40,31 +40,36 @@ func MakeSubscribePipeline(args ...string) Pipeline {
 
 	err = retry.Do(func() error {
 
-		sock, err := sub.NewSocket()
+		if err != nil {
+			Log.Warnf("Retrying in %v...", sleepTime)
+			time.Sleep(sleepTime)
+		}
+
+		sock, err = sub.NewSocket()
 		if err != nil {
 			Log.Warnf("can't create sub socket: %s", err.Error())
+			return err
 		}
 		err = sock.Dial(url)
 		if err != nil {
 			Log.Warnf("can't dial %s on socket: %s", url, err.Error())
+			return err
 		}
 		err = sock.SetOption(mangos.OptionSubscribe, topic)
 		if err != nil {
 			Log.Warnf("cannot subscribe (to '%s'): %s", string(topic), err.Error())
+			return err
 		}
 		_, err = sock.GetOption(mangos.OptionTLSConfig)
 		if err == nil {
 			err = sock.SetOption(mangos.OptionTLSConfig, utils.GetTLSConfig())
 			if err != nil {
 				Log.Warnf("cannot set TLS op: %s", err.Error())
+				return err
 			}
 		}
 
-		if err != nil {
-			Log.Warnf("Retrying in %v...", sleepTime)
-			time.Sleep(sleepTime)
-		}
-		return err
+		return nil
 	})
 
 	if err != nil {

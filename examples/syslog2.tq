@@ -5,7 +5,7 @@
 (tq/run (out
             (tq/fork
                     (in)
-                    (filter/any "$.content" "NXDOMAIN")
+                    (filter/any "$.message" "NXDOMAIN")
             )
         )
 )

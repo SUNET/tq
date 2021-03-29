@@ -1,22 +1,23 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"flag"
 	"fmt"
+	"github.com/spy16/slurp"
+	"github.com/spy16/slurp/core"
+	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spy16/sabre"
-	"github.com/spy16/sabre/repl"
-	"github.com/spy16/slang"
+	"github.com/spy16/slurp/repl"
 	"github.com/sunet/tq/pkg/api"
 	"github.com/sunet/tq/pkg/message"
 	"github.com/sunet/tq/pkg/meta"
 	"github.com/sunet/tq/pkg/pipeline"
-	)
+)
 
 var Log = logrus.New()
 
@@ -53,18 +54,25 @@ func configLogger(log *logrus.Logger, ll string) {
 	}
 }
 
-func readEvalFiles(sl *slang.Slang, files ...string) sabre.Value {
-	var v sabre.Value
+func ReadEval(sl *slurp.Interpreter, r io.Reader) (core.Any, error) {
+	var data []byte
+	mod, err := r.Read(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return sl.Eval(mod)
+}
+
+func readEvalFiles(sl *slurp.Interpreter, files ...string) core.Any {
+	var v core.Any
 	for _, g := range files {
 		matches, _ := filepath.Glob(g)
 		for _, r := range matches {
 			Log.Debugf("About to load %s", r)
-			f, err := os.Open(r)
-			defer f.Close()
-			if err != nil {
-				Log.Fatalf("Unable to open %s: %s", r, err.Error())
-			}
-			v, err = sl.ReadEval(bufio.NewReader(f))
+
+			s, err := ioutil.ReadFile(r)
+			v, err = sl.EvalStr(string(s))
 			if err != nil {
 				Log.Fatalf("Unable to execute %s: %s", r, err.Error())
 			}
@@ -91,7 +99,7 @@ func main() {
 	files := flag.Args()
 	relpFlag = relpFlag || (len(files) == 0)
 	srf := NewScriptReaderFactory()
-	sl := NewSlang()
+	sl := NewInterpreter()
 
 	if relpFlag {
 		repl.New(sl,
