@@ -1,4 +1,4 @@
 (tq/listen ":8080")
 (def out (nanomsg/pub "tcp://127.0.0.1:9991"))
 (def onesec (tq/timer "1s"))
-(run (out (onesec)))
+(tq/run (out (onesec)))

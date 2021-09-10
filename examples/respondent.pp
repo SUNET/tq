@@ -3,7 +3,7 @@
 (def cosmos (script/pipeline "run-cosmos" "-v"))
 
 (def handler (fn* [msg]
-     (core/case msg.cmd
+     (case msg.cmd
                 ("facts"  (script/handler "facter" "-j" msg))
                 ("date"   (script/handler "date"))
                 ("cosmos" (script/handler "run-cosmos" "-v" msg)))))
