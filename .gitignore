@@ -1,4 +1,3 @@
-tq
 .project
 .settings
 .idea
@@ -6,3 +5,5 @@ vendor
 .cache
 .build
 obj-*
+tq
+!cmd/tq
